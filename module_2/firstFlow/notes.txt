@@ -1,0 +1,36 @@
+id: discordnotification
+namespace: datatalks
+
+inputs:
+  - id: discordurl
+    type: STRING
+    defaults: https://discord.com/api/webhooks/1335363120235020328/kBqxjx2UQ5xoXuO_QOEKAOUOHqvSEsM2BaOFDEBI8zf6TU57VbpajY4A898CJRlILSfs
+
+tasks:
+  - id: pythonScript
+    type: io.kestra.plugin.scripts.python.Commands
+    namespaceFiles:
+      enabled: true
+    beforeCommands:
+      - python3 -m venv .venv
+      - pip install -r requirments.txt
+    commands:
+      - python scripts/script.py
+
+  - id: outputKestra
+    type: io.kestra.plugin.core.log.Log
+    message: "{{outputs.pythonScript.vars.starCount}}"
+
+  - id: discordNotification
+    type: io.kestra.plugin.notifications.discord.DiscordExecution
+    url: "{{inputs.discordurl}}"
+    content: "The nubmer of stars is {{outputs.pythonScript.vars.starCount}}"
+
+triggers:
+  - id: sechudle
+    type: io.kestra.plugin.core.trigger.Schedule
+    cron: "*/5 * * * *"
+    disabled: true
+
+
+    ----------------docker run -d -p 5050:80 -e PGADMIN_DEFAULT_EMAIL=admin@admin.com -e PGADMIN_DEFAULT_PASSWORD=root dpage/pgadmin4

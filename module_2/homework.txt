@@ -1,0 +1,30 @@
+First question : 
+I have triggered the flow in 2020-12-01 as the start 
+then I figgerd the output file of the extract method and it was 128.3
+
+Second question : 
+The rendered of variable file when inputs is taxi:green 
+year:2020 month:04 
+it will be green_tripdata_2020-04.csv
+
+Third question : 
+I have triggered the flow in 2020-01 as the start and 
+2020-12 as end to get all datain 2020 then I make a query 
+-- SELECT COUNT(*)
+    FROM yellow_taxidata 
+    WHERE DATE_PART('year', tpep_pickup_datetime) = '2020'
+
+Fourth question : 
+I did the same as the third question only change is green taxi data 
+
+Fifth question : 
+I have triggered the flow in 2020-03 as the start then I have 
+did a query in staging table to get the numbe of rows in it
+-- SELECT COUNT(*)
+    FROM yellow_takidata_staging 
+
+Sixth question : 
+Last question was how to configure the trigger to match with newyork
+timezone and I have searched about it in kestra documentation and
+found that I can use the timezone in the trigger and I have set it to 
+America/New_York

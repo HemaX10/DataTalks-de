@@ -1,0 +1,89 @@
+
+## First Question: Version of pip
+I have edited the Dockerfile to have `FROM python:3.12.8` then I built an image to take these changes. After that, I ran the container and used `docker exec -it taxi_ingest_container bash` to open the container and ran `pip --version`. 
+The right answer is "24.3.1".
+
+## Second Question: Docker Networking and Docker-Compose
+The question needs the hostname and the port where Postgres is opened. The port is 5432, and the hostname can be obtained from the command used inside pgAdmin to make the server host as `pg-database`.
+
+## Before Third Question: Prepare Postgres
+Run Postgres and load data as shown in the videos using the green taxi trips from October 2019:
+```bash
+wget https://github.com/DataTalksClub/nyc-tlc-data/releases/download/green/green_tripdata_2019-10.csv.gz
+```
+I will use the same code with the only change being the URL of the data, and everything will still be the same.
+
+It takes a lot of time more than expected. The first issue I faced was that every time I wanted to remove the image and container, I had another change to make. The first issue was that the link was in `.gz` format, which I needed to unzip to get the file. Here, ChatGPT provided the solution for that by adding `df = pd.read_csv(url, compression='gzip')`, and this worked well. The second issue was that the name of the files was different, which was easy to solve by editing the Python file to have the correct name. 
+
+### Commands:
+1. `docker build -t green_taxidata:v001 -f DockerFile .`
+2. `docker run -it --name green_taxidataContainer --network=pg-network green_taxidata --user=root --password=root --host=pg-database --port=5432 --db=ny_taxi --table_name=green_taxidata --url="https://github.com/DataTalksClub/nyc-tlc-data/releases/download/green/green_tripdata_2019-10.csv.gz"`
+
+Commands used to remove the container and image:
+1. `docker rm green_taxidataContainer -f`
+2. `docker image rm green_taxidata:v001 -f`
+
+You will also need the dataset with zones:
+```bash
+wget https://github.com/DataTalksClub/nyc-tlc-data/releases/download/misc/taxi_zone_lookup.csv
+```
+
+The same process here but it was easier because I knew what I was doing and had learned from my mistakes.
+
+### Commands:
+1. `docker build -t zone_taxihw -f DockerFile .`
+2. `docker run -it --name zoneDataContainer --network=pg-network zone_taxihw --user=root --password=root --host=pg-database --port=5432 --db=ny_taxi --table_name=zone_dataHW --url="https://github.com/DataTalksClub/nyc-tlc-data/releases/download/misc/taxi_zone_lookup.csv"`
+
+## Third Question: Trip Segmentation Count
+During the period from October 1st, 2019 (inclusive) to November 1st, 2019 (exclusive), how many trips, respectively, happened in these distance categories:
+
+- Up to 1 mile
+- Between 1 and 3 miles (inclusive)
+- Between 3 and 7 miles (inclusive)
+- Between 7 and 10 miles (inclusive)
+- Over 10 miles
+
+I am in pgAdmin and using SQL. To write a query for this, I altered the column to a timestamp to make the job easier and started writing a query:
+```sql
+--SELECT COUNT(*)
+FROM green_taxidata
+WHERE lpep_pickup_datetime >= '2019-10-01' AND lpep_dropoff_datetime < '2019-11-01'
+  AND trip_distance <=1
+```
+Other queries have a similar structure with only the `trip_distance` condition changing.
+
+## Fourth Question: Longest Trip for Each Day
+```sql
+--SELECT *
+FROM green_taxidata
+WHERE trip_distance = (SELECT MAX(trip_distance) FROM green_taxidata)
+```
+
+## Fifth Question: Biggest Pickup Zones
+```sql
+--SELECT zones."Zone", SUM(total_amount)
+FROM green_taxidata as taxi
+INNER JOIN "zone_dataHW" as zones
+ON taxi."PULocationID" = zones."LocationID"
+WHERE taxi.lpep_pickup_datetime >= '2019-10-18'
+  AND taxi.lpep_pickup_datetime < '2019-10-19'
+GROUP BY zones."Zone"
+HAVING SUM(total_amount) >= 13000
+```
+
+## Sixth Question: Largest Tip
+This question is a bit tricky. It asks, "For passengers picked up in October 2019 in the zone named 'East Harlem North', which was the drop-off zone that had the largest tip?" Since it asks for a location for the drop-off, I need to use a subquery to get the answer:
+```sql
+--SELECT "Zone", tip_amount
+FROM green_taxidata as taxi
+INNER JOIN "zone_dataHW" as zones
+ON taxi."DOLocationID" = zones."LocationID"
+WHERE lpep_pickup_datetime >= '2019-10-01' AND lpep_pickup_datetime <= '2019-10-31'
+  AND "PULocationID" = (
+      SELECT "LocationID"
+      FROM "zone_dataHW"
+      WHERE "Zone" = 'East Harlem North'
+  )
+ORDER BY tip_amount DESC
+```
+

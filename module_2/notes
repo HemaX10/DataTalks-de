@@ -1,0 +1,9 @@
+To pull it 
+1 : docker run --pull=always -it -p 8080:8080 --user=root -v /var/run/docker.sock:/var/run/docker.sock -v /tmp:/tmp kestra/kestra:latest server local
+
+
+docker run -it -p 8080:8080 --user=root \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  -v /tmp:/tmp \
+  -v kestra_storage:/app/storage \
+  kestra_saved server local
