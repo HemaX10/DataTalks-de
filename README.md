@@ -5,9 +5,9 @@ This repository contains my progress in the **DataTalks Data Engineering Course*
 ## 📌 Course Overview  
 The course covers various topics essential for Data Engineering, including:  
 - **Docker & Containers** ✅ *(Completed - Check Homework Below)*
+- Workflow Orchestration  ✅ *(Completed - Check Homework Below)*
 - Data Warehousing  
 - Data Lake & Lakehouse  
-- Workflow Orchestration  
 - Batch & Streaming Processing  
 - Cloud & Infrastructure  
 - And more...  
@@ -21,8 +21,8 @@ Each module has its own folder containing:
 
 ## ✅ Completed Modules  
 - [x] **Module 1: Docker & Containers** – [Homework Solution](./module_1/homework.txt)
-- [ ] **Module 2: Data Warehousing** *(In Progress)*  
-- [ ] **Module 3: Workflow Orchestration* *(Upcoming)*  
+- [x] **Module 2: Workflow Orchestration* – [Homework Solution](./module_2/homework.txt)
+- [ ] **Module 3: Data Warehousing** *(In Progress)*
 
 ## 📢 Why Am I Doing This?  
 I believe in **learning in public** and sharing my journey with the data engineering community. By documenting my progress, I hope to:  
